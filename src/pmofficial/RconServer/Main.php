@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace pmofficial\RconServer;
 
 use Particle\Validator\Validator;
-use pocketmine\command\RemoteConsoleCommandSender;
 use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginException;
 use function base64_encode;
@@ -36,7 +35,7 @@ class Main extends PluginBase{
 			$this->rcon = new Rcon(
 				$config,
 				function(string $commandLine) : string{
-					$response = new RemoteConsoleCommandSender();
+					$response = new RconCommandSender();
 					$this->getServer()->dispatchCommand($response, $commandLine);
 					return $response->getMessage();
 				},

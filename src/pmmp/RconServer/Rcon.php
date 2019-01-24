@@ -26,7 +26,7 @@ declare(strict_types=1);
  * Source: https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
  */
 
-namespace pmofficial\RconServer;
+namespace pmmp\RconServer;
 
 use DaveRandom\CallbackValidator\InvalidCallbackException;
 use pocketmine\snooze\SleeperHandler;

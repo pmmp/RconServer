@@ -21,7 +21,7 @@
 
 declare(strict_types=1);
 
-namespace pmofficial\RconServer;
+namespace pmmp\RconServer;
 
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\lang\TextContainer;

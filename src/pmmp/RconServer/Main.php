@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace pmofficial\RconServer;
+namespace pmmp\RconServer;
 
 use Particle\Validator\Validator;
 use pocketmine\plugin\PluginBase;

@@ -1,8 +1,8 @@
 name: RconServer
-main: pmofficial\RconServer\Main
+main: pmmp\RconServer\Main
 version: 1.0.0
 api: 4.0.0
 load: POSTWORLD
-author: pmofficial
+author: PMMP Team
 description: Allow RCON clients to control your server
 website: https://github.com/pmmp/RconServer

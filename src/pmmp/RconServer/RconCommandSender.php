@@ -32,7 +32,7 @@ class RconCommandSender extends ConsoleCommandSender{
 	/** @var string */
 	private $messages = "";
 
-	public function sendMessage($message){
+	public function sendMessage($message) : void{
 		if($message instanceof TextContainer){
 			$message = $this->getServer()->getLanguage()->translate($message);
 		}else{

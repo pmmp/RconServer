@@ -147,9 +147,7 @@ class RconThread extends Thread{
 		$this->stop = true;
 	}
 
-	public function run() : void{
-		$this->registerClassLoader();
-
+	protected function onRun() : void{
 		/** @var resource[] $clients */
 		$clients = [];
 		/** @var int[] $authenticated */

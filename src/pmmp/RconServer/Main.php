@@ -9,10 +9,12 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginException;
 use function base64_encode;
 use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
 use function implode;
 use function random_bytes;
-use function yaml_emit_file;
-use function yaml_parse_file;
+use function yaml_emit;
+use function yaml_parse;
 use const PHP_INT_MAX;
 
 class Main extends PluginBase{
@@ -63,11 +65,11 @@ class Main extends PluginBase{
 				'max-connections' => 50,
 				'password' => base64_encode(random_bytes(8))
 			];
-			yaml_emit_file($fileLocation, $config);
+			file_put_contents($fileLocation, yaml_emit($config));
 			$this->getLogger()->notice('RCON config file generated at ' . $fileLocation . '. Please customize it.');
 		}else{
 			try{
-				$config = yaml_parse_file($fileLocation);
+				$config = yaml_parse(file_get_contents($fileLocation));
 			}catch(\ErrorException $e){
 				throw new PluginException($e->getMessage());
 			}

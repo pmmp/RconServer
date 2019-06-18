@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pmmp\RconServer;
 
 use pocketmine\snooze\SleeperNotifier;
-use pocketmine\Thread;
+use pocketmine\thread\Thread;
 use pocketmine\utils\Binary;
 use function count;
 use function ltrim;

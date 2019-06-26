@@ -29,6 +29,7 @@ declare(strict_types=1);
 namespace pmmp\RconServer;
 
 use DaveRandom\CallbackValidator\InvalidCallbackException;
+use pocketmine\network\NetworkInterface;
 use pocketmine\snooze\SleeperHandler;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\utils\TextFormat;
@@ -45,12 +46,13 @@ use function socket_write;
 use function trim;
 use const AF_INET;
 use const AF_UNIX;
+use const PTHREADS_INHERIT_NONE;
 use const SOCK_STREAM;
 use const SOCKET_ENOPROTOOPT;
 use const SOCKET_EPROTONOSUPPORT;
 use const SOL_TCP;
 
-class Rcon{
+class Rcon implements NetworkInterface{
 	/** @var resource */
 	private $socket;
 
@@ -106,7 +108,19 @@ class Rcon{
 		$this->thread = new RconThread($this->socket, $config->getPassword(), $config->getMaxConnections(), $logger, $this->ipcThreadSocket, $notifier);
 	}
 
-	public function stop() : void{
+	public function start() : void{
+		$this->thread->start(PTHREADS_INHERIT_NONE);
+	}
+
+	public function tick() : void{
+
+	}
+
+	public function setName(string $name) : void{
+
+	}
+
+	public function shutdown() : void{
 		$this->thread->close();
 		socket_write($this->ipcMainSocket, "\x00"); //make select() return
 		$this->thread->quit();

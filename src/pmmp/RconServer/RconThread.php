@@ -45,7 +45,6 @@ use function str_replace;
 use function strlen;
 use function substr;
 use function trim;
-use const PTHREADS_INHERIT_NONE;
 use const SO_KEEPALIVE;
 use const SO_LINGER;
 use const SOCKET_ECONNRESET;
@@ -91,8 +90,6 @@ class RconThread extends Thread{
 		$this->logger = $logger;
 		$this->ipcSocket = $ipcSocket;
 		$this->notifier = $notifier;
-
-		$this->start(PTHREADS_INHERIT_NONE);
 	}
 
 	private function writePacket($client, int $requestID, int $packetType, string $payload){

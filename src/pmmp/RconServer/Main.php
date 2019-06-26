@@ -19,9 +19,6 @@ use const PHP_INT_MAX;
 
 class Main extends PluginBase{
 
-	/** @var Rcon|null */
-	private $rcon = null;
-
 	public function onEnable() : void{
 		try{
 			$config = $this->loadConfig();
@@ -34,7 +31,7 @@ class Main extends PluginBase{
 
 		$this->getLogger()->info('Starting RCON on ' . $config->getIp() . ':' . $config->getPort());
 		try{
-			$this->rcon = new Rcon(
+			$this->getServer()->getNetwork()->registerInterface(new Rcon(
 				$config,
 				function(string $commandLine) : string{
 					$response = new RconCommandSender();
@@ -43,7 +40,7 @@ class Main extends PluginBase{
 				},
 				$this->getServer()->getLogger(),
 				$this->getServer()->getTickSleeper()
-			);
+			));
 		}catch(\RuntimeException $e){
 			$this->getLogger()->alert('Failed to start RCON: ' . $e->getMessage());
 			$this->getLogger()->logException($e);
@@ -91,12 +88,5 @@ class Main extends PluginBase{
 		}
 
 		return new RconConfig((string) $config['ip'], (int) $config['port'], (int) $config['max-connections'], (string) $config['password']);
-	}
-
-	public function onDisable() : void{
-		if($this->rcon !== null){
-			$this->rcon->stop();
-			$this->rcon = null;
-		}
 	}
 }

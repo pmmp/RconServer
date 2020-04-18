@@ -1,0 +1,31 @@
+language: php
+
+php:
+ - 7.2
+ - 7.3
+
+before_script:
+ - phpenv config-rm xdebug.ini
+# - pecl install channel://pecl.php.net/pthreads-3.1.6
+ - echo | pecl install channel://pecl.php.net/yaml-2.0.4
+ - git clone https://github.com/pmmp/pthreads.git
+ - cd pthreads
+ - git checkout 1b7da492b944146fa9680f6399bd9c6c6c6095e0
+ - phpize
+ - ./configure
+ - make
+ - make install
+ - cd ..
+ - echo "extension=pthreads.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+script:
+ - COMPOSER=phpstan-composer.json composer install --prefer-dist
+ - ./vendor/bin/phpstan analyze --no-progress --memory-limit=2G
+
+cache:
+ directories:
+  - $HOME/.composer/cache/files
+  - $HOME/.composer/cache/vcs
+
+notifications:
+ email: false

@@ -26,6 +26,7 @@ namespace pmmp\RconServer;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\thread\Thread;
 use pocketmine\utils\Binary;
+use ThreadedLogger;
 use function count;
 use function ltrim;
 use function microtime;
@@ -65,7 +66,7 @@ class RconThread extends Thread{
 	private $password;
 	/** @var int */
 	private $maxClients;
-	/** @var \ThreadedLogger */
+	/** @var ThreadedLogger */
 	private $logger;
 	/** @var resource */
 	private $ipcSocket;
@@ -76,11 +77,11 @@ class RconThread extends Thread{
 	 * @param resource             $socket
 	 * @param string               $password
 	 * @param int                  $maxClients
-	 * @param \ThreadedLogger      $logger
+	 * @param ThreadedLogger      $logger
 	 * @param resource             $ipcSocket
 	 * @param null|SleeperNotifier $notifier
 	 */
-	public function __construct($socket, string $password, int $maxClients, \ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier){
+	public function __construct($socket, string $password, int $maxClients, ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier){
 		$this->stop = false;
 		$this->cmd = "";
 		$this->response = "";
@@ -152,7 +153,6 @@ class RconThread extends Thread{
 		/** @var float[] $timeouts */
 		$timeouts = [];
 
-		/** @var int $nextClientId */
 		$nextClientId = 0;
 
 		while(!$this->stop){

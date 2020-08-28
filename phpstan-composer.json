@@ -6,15 +6,11 @@
       "phpstan/phpstan-strict-rules": "^0.12.2",
       "phpstan/extension-installer": "^1.0"
    },
+   "minimum-stability": "dev",
+   "prefer-stable": true,
    "autoload": {
       "psr-4": {
          "": "./src"
       }
-   },
-   "repositories": [
-      {
-         "type": "vcs",
-         "url": "https://github.com/pmmp/PocketMine-MP"
-      }
-   ]
+   }
 }

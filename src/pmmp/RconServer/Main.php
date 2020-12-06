@@ -57,7 +57,6 @@ class Main extends PluginBase{
 	}
 
 	/**
-	 * @return RconConfig
 	 * @throws PluginException
 	 */
 	private function loadConfig() : RconConfig{

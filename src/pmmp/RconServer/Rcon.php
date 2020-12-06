@@ -68,11 +68,6 @@ class Rcon implements NetworkInterface{
 	private $ipcThreadSocket;
 
 	/**
-	 * @param RconConfig      $config
-	 * @param callable        $onCommandCallback
-	 * @param \ThreadedLogger $logger
-	 * @param SleeperHandler  $sleeper
-	 *
 	 * @throws \RuntimeException
 	 * @throws InvalidCallbackException
 	 */

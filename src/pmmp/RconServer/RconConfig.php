@@ -41,30 +41,18 @@ class RconConfig{
 		$this->password = $password;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getIp() : string{
 		return $this->ip;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getPort() : int{
 		return $this->port;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getMaxConnections() : int{
 		return $this->maxConnections;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getPassword() : string{
 		return $this->password;
 	}

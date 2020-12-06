@@ -74,11 +74,7 @@ class RconThread extends Thread{
 
 	/**
 	 * @param resource             $socket
-	 * @param string               $password
-	 * @param int                  $maxClients
-	 * @param \ThreadedLogger      $logger
 	 * @param resource             $ipcSocket
-	 * @param null|SleeperNotifier $notifier
 	 */
 	public function __construct($socket, string $password, int $maxClients, \ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier){
 		$this->stop = false;

@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace pmmp\RconServer;
 
-use Particle\Validator\Validator;
 use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginException;
+use Respect\Validation\Exceptions\NestedValidationException;
+use Respect\Validation\Rules\AllOf;
+use Respect\Validation\Rules\Between;
+use Respect\Validation\Rules\GreaterThan;
+use Respect\Validation\Rules\IntType;
+use Respect\Validation\Rules\Ip;
+use Respect\Validation\Rules\Key;
+use Respect\Validation\Rules\StringType;
+use Respect\Validation\Validator;
 use function base64_encode;
 use function file_exists;
 use function file_get_contents;
 use function file_put_contents;
-use function implode;
 use function random_bytes;
 use function yaml_emit;
 use function yaml_parse;
-use const PHP_INT_MAX;
 
 class Main extends PluginBase{
 
@@ -34,7 +40,8 @@ class Main extends PluginBase{
 			$this->getServer()->getNetwork()->registerInterface(new Rcon(
 				$config,
 				function(string $commandLine) : string{
-					$response = new RconCommandSender();
+					$response = new RconCommandSender($this->getServer(), $this->getServer()->getLanguage());
+					$response->recalculatePermissions();
 					$this->getServer()->dispatchCommand($response, $commandLine);
 					return $response->getMessage();
 				},
@@ -72,19 +79,17 @@ class Main extends PluginBase{
 			}
 		}
 
-		$validator = new Validator();
-		$validator->required('ip')->string();
-		$validator->required('port')->between(0, 65535)->integer();
-		$validator->required('max-connections')->between(1, PHP_INT_MAX)->integer(); //greaterThan is too dumb for this
-		$validator->required('password')->string();
-
-		$result = $validator->validate($config);
-		if($result->isNotValid()){
-			$messages = [];
-			foreach($result->getFailures() as $failure){
-				$messages[] = $failure->format();
-			}
-			throw new PluginException(implode('; ', $messages));
+		$validator = new Validator(
+			new Key('ip', new Ip(), true),
+			new Key('port', new AllOf(new IntType(), new Between(0, 65535))),
+			new Key('max-connections', new AllOf(new IntType(), new GreaterThan(0))),
+			new Key('password', new StringType())
+		);
+		$validator->setName('rcon.yml');
+		try{
+			$validator->assert($config);
+		}catch(NestedValidationException $e){
+			throw new PluginException($e->getFullMessage(), 0, $e);
 		}
 
 		return new RconConfig((string) $config['ip'], (int) $config['port'], (int) $config['max-connections'], (string) $config['password']);

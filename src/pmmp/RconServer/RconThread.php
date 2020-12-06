@@ -76,7 +76,7 @@ class RconThread extends Thread{
 	 * @param resource             $socket
 	 * @param resource             $ipcSocket
 	 */
-	public function __construct($socket, string $password, int $maxClients, \ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier){
+	public function __construct($socket, string $password, int $maxClients, \ThreadedLogger $logger, $ipcSocket, SleeperNotifier $notifier){
 		$this->stop = false;
 		$this->cmd = "";
 		$this->response = "";
@@ -88,15 +88,21 @@ class RconThread extends Thread{
 		$this->notifier = $notifier;
 	}
 
-	private function writePacket($client, int $requestID, int $packetType, string $payload){
+	/**
+	 * @param resource $client
+	 */
+	private function writePacket($client, int $requestID, int $packetType, string $payload) : void{
 		$pk = Binary::writeLInt($requestID)
 			. Binary::writeLInt($packetType)
 			. $payload
 			. "\x00\x00"; //Terminate payload and packet
-		return socket_write($client, Binary::writeLInt(strlen($pk)) . $pk);
+		socket_write($client, Binary::writeLInt(strlen($pk)) . $pk);
 	}
 
-	private function readPacket($client, ?int &$requestID, ?int &$packetType, ?string &$payload){
+	/**
+	 * @param resource $client
+	 */
+	private function readPacket($client, ?int &$requestID, ?int &$packetType, ?string &$payload) : bool{
 		$d = @socket_read($client, 4);
 
 		socket_getpeername($client, $ip, $port);
@@ -184,8 +190,6 @@ class RconThread extends Thread{
 						if($p === false){
 							$disconnect[$id] = $sock;
 							continue;
-						}elseif($p === null){
-							continue;
 						}
 
 						switch($packetType){
@@ -212,7 +216,7 @@ class RconThread extends Thread{
 								}
 								if($payload !== ""){
 									$this->cmd = ltrim($payload);
-									$this->synchronized(function(){
+									$this->synchronized(function() : void{
 										$this->notifier->wakeupSleeper();
 										$this->wait();
 									});
@@ -243,6 +247,9 @@ class RconThread extends Thread{
 		}
 	}
 
+	/**
+	 * @param resource $client
+	 */
 	private function disconnectClient($client) : void{
 		socket_getpeername($client, $ip, $port);
 		@socket_set_option($client, SOL_SOCKET, SO_LINGER, ["l_onoff" => 1, "l_linger" => 1]);

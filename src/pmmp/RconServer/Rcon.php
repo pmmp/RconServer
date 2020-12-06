@@ -68,19 +68,24 @@ class Rcon implements NetworkInterface{
 	private $ipcThreadSocket;
 
 	/**
+	 * @phpstan-param callable(string $command) : string $onCommandCallback
 	 * @throws \RuntimeException
 	 * @throws InvalidCallbackException
 	 */
 	public function __construct(RconConfig $config, callable $onCommandCallback, \ThreadedLogger $logger, SleeperHandler $sleeper){
 		Utils::validateCallableSignature(function(string $command) : string{}, $onCommandCallback);
 
-		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		if($socket === false){
+			throw new \RuntimeException("Failed to create socket: " . socket_strerror(socket_last_error()));
+		}
+		$this->socket = $socket;
 
 		if(!socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 1)){
 			throw new \RuntimeException("Unable to set option on socket: " . trim(socket_strerror(socket_last_error())));
 		}
 
-		if($this->socket === false or !@socket_bind($this->socket, $config->getIp(), $config->getPort()) or !@socket_listen($this->socket, 5)){
+		if(!@socket_bind($this->socket, $config->getIp(), $config->getPort()) or !@socket_listen($this->socket, 5)){
 			throw new \RuntimeException('Failed to open main socket: ' . trim(socket_strerror(socket_last_error())));
 		}
 
@@ -102,7 +107,7 @@ class Rcon implements NetworkInterface{
 			$response = $onCommandCallback($this->thread->cmd);
 
 			$this->thread->response = TextFormat::clean($response);
-			$this->thread->synchronized(function(RconThread $thread){
+			$this->thread->synchronized(function(RconThread $thread) : void{
 				$thread->notify();
 			}, $this->thread);
 		});

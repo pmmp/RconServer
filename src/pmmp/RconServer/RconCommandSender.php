@@ -42,7 +42,7 @@ class RconCommandSender extends ConsoleCommandSender{
 		$this->messages .= trim($message, "\r\n") . "\n";
 	}
 
-	public function getMessage(){
+	public function getMessage() : string{
 		return $this->messages;
 	}
 

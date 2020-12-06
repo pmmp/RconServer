@@ -143,7 +143,7 @@ class RconThread extends Thread{
 	protected function onRun() : void{
 		/** @var resource[] $clients */
 		$clients = [];
-		/** @var int[] $authenticated */
+		/** @var bool[] $authenticated */
 		$authenticated = [];
 		/** @var float[] $timeouts */
 		$timeouts = [];

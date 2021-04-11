@@ -69,7 +69,7 @@ class Rcon implements NetworkInterface{
 
 	/**
 	 * @phpstan-param callable(string $command) : string $onCommandCallback
-	 * @throws \RuntimeException
+	 * @throws RconException
 	 * @throws InvalidCallbackException
 	 */
 	public function __construct(RconConfig $config, callable $onCommandCallback, \ThreadedLogger $logger, SleeperHandler $sleeper){
@@ -77,16 +77,16 @@ class Rcon implements NetworkInterface{
 
 		$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		if($socket === false){
-			throw new \RuntimeException("Failed to create socket: " . socket_strerror(socket_last_error()));
+			throw new RconException("Failed to create socket: " . socket_strerror(socket_last_error()));
 		}
 		$this->socket = $socket;
 
 		if(!socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 1)){
-			throw new \RuntimeException("Unable to set option on socket: " . trim(socket_strerror(socket_last_error())));
+			throw new RconException("Unable to set option on socket: " . trim(socket_strerror(socket_last_error())));
 		}
 
 		if(!@socket_bind($this->socket, $config->getIp(), $config->getPort()) or !@socket_listen($this->socket, 5)){
-			throw new \RuntimeException('Failed to open main socket: ' . trim(socket_strerror(socket_last_error())));
+			throw new RconException('Failed to open main socket: ' . trim(socket_strerror(socket_last_error())));
 		}
 
 		socket_set_block($this->socket);
@@ -95,7 +95,7 @@ class Rcon implements NetworkInterface{
 		if(!$ret){
 			$err = socket_last_error();
 			if(($err !== SOCKET_EPROTONOSUPPORT and $err !== SOCKET_ENOPROTOOPT) or !@socket_create_pair(AF_INET, SOCK_STREAM, 0, $ipc)){
-				throw new \RuntimeException('Failed to open IPC socket: ' . trim(socket_strerror(socket_last_error())));
+				throw new RconException('Failed to open IPC socket: ' . trim(socket_strerror(socket_last_error())));
 			}
 		}
 

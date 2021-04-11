@@ -48,7 +48,7 @@ class Main extends PluginBase{
 				$this->getServer()->getLogger(),
 				$this->getServer()->getTickSleeper()
 			));
-		}catch(\RuntimeException $e){
+		}catch(RconException $e){
 			$this->getLogger()->alert('Failed to start RCON: ' . $e->getMessage());
 			$this->getLogger()->logException($e);
 			$this->getServer()->getPluginManager()->disablePlugin($this);

@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pmmp\RconServer;
 
-use pocketmine\command\ConsoleCommandSender;
+use pocketmine\console\ConsoleCommandSender;
 use pocketmine\lang\TranslationContainer;
 use function trim;
 

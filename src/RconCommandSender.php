@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pmmp\RconServer;
 
 use pocketmine\console\ConsoleCommandSender;
-use pocketmine\lang\TranslationContainer;
+use pocketmine\lang\Translatable;
 use function trim;
 
 class RconCommandSender extends ConsoleCommandSender{
@@ -32,11 +32,9 @@ class RconCommandSender extends ConsoleCommandSender{
 	/** @var string */
 	private $messages = "";
 
-	public function sendMessage($message) : void{
-		if($message instanceof TranslationContainer){
+	public function sendMessage(Translatable|string $message) : void{
+		if($message instanceof Translatable){
 			$message = $this->getServer()->getLanguage()->translate($message);
-		}else{
-			$message = $this->getServer()->getLanguage()->translateString($message);
 		}
 
 		$this->messages .= trim($message, "\r\n") . "\n";

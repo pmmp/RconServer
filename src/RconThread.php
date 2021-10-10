@@ -59,7 +59,7 @@ class RconThread extends Thread{
 
 	/** @var bool */
 	private $stop;
-	/** @var resource */
+	/** @var \Socket */
 	private $socket;
 	/** @var string */
 	private $password;
@@ -67,16 +67,12 @@ class RconThread extends Thread{
 	private $maxClients;
 	/** @var \ThreadedLogger */
 	private $logger;
-	/** @var resource */
+	/** @var \Socket */
 	private $ipcSocket;
-	/** @var SleeperNotifier|null */
+	/** @var SleeperNotifier */
 	private $notifier;
 
-	/**
-	 * @param resource             $socket
-	 * @param resource             $ipcSocket
-	 */
-	public function __construct($socket, string $password, int $maxClients, \ThreadedLogger $logger, $ipcSocket, SleeperNotifier $notifier){
+	public function __construct(\Socket $socket, string $password, int $maxClients, \ThreadedLogger $logger, \Socket $ipcSocket, SleeperNotifier $notifier){
 		$this->stop = false;
 		$this->cmd = "";
 		$this->response = "";
@@ -88,10 +84,7 @@ class RconThread extends Thread{
 		$this->notifier = $notifier;
 	}
 
-	/**
-	 * @param resource $client
-	 */
-	private function writePacket($client, int $requestID, int $packetType, string $payload) : void{
+	private function writePacket(\Socket $client, int $requestID, int $packetType, string $payload) : void{
 		$pk = Binary::writeLInt($requestID)
 			. Binary::writeLInt($packetType)
 			. $payload
@@ -99,10 +92,7 @@ class RconThread extends Thread{
 		socket_write($client, Binary::writeLInt(strlen($pk)) . $pk);
 	}
 
-	/**
-	 * @param resource $client
-	 */
-	private function readPacket($client, ?int &$requestID, ?int &$packetType, ?string &$payload) : bool{
+	private function readPacket(\Socket $client, ?int &$requestID, ?int &$packetType, ?string &$payload) : bool{
 		$d = @socket_read($client, 4);
 
 		socket_getpeername($client, $ip, $port);
@@ -147,7 +137,7 @@ class RconThread extends Thread{
 	}
 
 	protected function onRun() : void{
-		/** @var resource[] $clients */
+		/** @var \Socket[] $clients */
 		$clients = [];
 		/** @var bool[] $authenticated */
 		$authenticated = [];
@@ -247,10 +237,7 @@ class RconThread extends Thread{
 		}
 	}
 
-	/**
-	 * @param resource $client
-	 */
-	private function disconnectClient($client) : void{
+	private function disconnectClient(\Socket $client) : void{
 		socket_getpeername($client, $ip, $port);
 		@socket_set_option($client, SOL_SOCKET, SO_LINGER, ["l_onoff" => 1, "l_linger" => 1]);
 		@socket_shutdown($client, 2);

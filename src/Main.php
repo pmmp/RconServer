@@ -71,8 +71,12 @@ class Main extends PluginBase{
 			file_put_contents($fileLocation, yaml_emit($config));
 			$this->getLogger()->notice('RCON config file generated at ' . $fileLocation . '. Please customize it.');
 		}else{
+			$rawConfig = @file_get_contents($fileLocation);
+			if($rawConfig === false){
+				throw new PluginException('Failed to read config file ' . $fileLocation . ' (permission denied)');
+			}
 			try{
-				$config = yaml_parse(file_get_contents($fileLocation));
+				$config = yaml_parse($rawConfig);
 			}catch(\ErrorException $e){
 				throw new PluginException($e->getMessage());
 			}

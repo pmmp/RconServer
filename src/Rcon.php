@@ -28,12 +28,10 @@ declare(strict_types=1);
 
 namespace pmmp\RconServer;
 
-use DaveRandom\CallbackValidator\InvalidCallbackException;
 use pocketmine\network\NetworkInterface;
 use pocketmine\snooze\SleeperHandler;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\utils\TextFormat;
-use pocketmine\utils\Utils;
 use function socket_bind;
 use function socket_close;
 use function socket_create;
@@ -56,25 +54,22 @@ use const SOL_SOCKET;
 use const SOL_TCP;
 
 class Rcon implements NetworkInterface{
-	/** @var resource */
+	/** @var \Socket */
 	private $socket;
 
 	/** @var RconThread */
 	private $thread;
 
-	/** @var resource */
+	/** @var \Socket */
 	private $ipcMainSocket;
-	/** @var resource */
+	/** @var \Socket */
 	private $ipcThreadSocket;
 
 	/**
 	 * @phpstan-param callable(string $command) : string $onCommandCallback
 	 * @throws RconException
-	 * @throws InvalidCallbackException
 	 */
 	public function __construct(RconConfig $config, callable $onCommandCallback, \ThreadedLogger $logger, SleeperHandler $sleeper){
-		Utils::validateCallableSignature(function(string $command) : string{}, $onCommandCallback);
-
 		$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		if($socket === false){
 			throw new RconException("Failed to create socket: " . socket_strerror(socket_last_error()));

@@ -6,19 +6,16 @@ namespace pmmp\RconServer;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginException;
-use Respect\Validation\Exceptions\NestedValidationException;
-use Respect\Validation\Rules\AllOf;
-use Respect\Validation\Rules\Between;
-use Respect\Validation\Rules\GreaterThan;
-use Respect\Validation\Rules\IntType;
-use Respect\Validation\Rules\Ip;
-use Respect\Validation\Rules\Key;
-use Respect\Validation\Rules\StringType;
-use Respect\Validation\Validator;
+use Webmozart\PathUtil\Path;
 use function base64_encode;
 use function file_exists;
 use function file_get_contents;
 use function file_put_contents;
+use function inet_pton;
+use function is_array;
+use function is_float;
+use function is_int;
+use function is_string;
 use function random_bytes;
 use function yaml_emit;
 use function yaml_parse;
@@ -26,10 +23,11 @@ use function yaml_parse;
 class Main extends PluginBase{
 
 	public function onEnable() : void{
+		$configPath = Path::join($this->getDataFolder(), 'rcon.yml');
 		try{
-			$config = $this->loadConfig();
+			$config = $this->loadConfig($configPath);
 		}catch(PluginException $e){
-			$this->getLogger()->alert('Invalid config file: ' . $e->getMessage());
+			$this->getLogger()->alert('Invalid config file ' . $configPath . ': ' . $e->getMessage());
 			$this->getLogger()->alert('Please fix the errors and restart the server.');
 			$this->getServer()->getPluginManager()->disablePlugin($this);
 			return;
@@ -59,8 +57,7 @@ class Main extends PluginBase{
 	/**
 	 * @throws PluginException
 	 */
-	private function loadConfig() : RconConfig{
-		$fileLocation = $this->getDataFolder() . 'rcon.yml';
+	private function loadConfig(string $fileLocation) : RconConfig{
 		if(!file_exists($fileLocation)){
 			$config = [
 				'ip' => $this->getServer()->getIp(),
@@ -73,7 +70,7 @@ class Main extends PluginBase{
 		}else{
 			$rawConfig = @file_get_contents($fileLocation);
 			if($rawConfig === false){
-				throw new PluginException('Failed to read config file ' . $fileLocation . ' (permission denied)');
+				throw new PluginException('Failed to read config file (permission denied)');
 			}
 			try{
 				$config = yaml_parse($rawConfig);
@@ -82,19 +79,36 @@ class Main extends PluginBase{
 			}
 		}
 
-		$validator = new Validator(
-			new Key('ip', new Ip(), true),
-			new Key('port', new AllOf(new IntType(), new Between(0, 65535))),
-			new Key('max-connections', new AllOf(new IntType(), new GreaterThan(0))),
-			new Key('password', new StringType())
-		);
-		$validator->setName('rcon.yml');
-		try{
-			$validator->assert($config);
-		}catch(NestedValidationException $e){
-			throw new PluginException($e->getFullMessage(), 0, $e);
+		if(!is_array($config)){
+			throw new PluginException('Failed to parse config file');
 		}
 
-		return new RconConfig((string) $config['ip'], (int) $config['port'], (int) $config['max-connections'], (string) $config['password']);
+		$ip = null;
+		$port = null;
+		$maxConnections = null;
+		$password = null;
+		foreach($config as $key => $value){
+			match($key){
+				'ip' => is_string($value) && inet_pton($value) !== false ? $ip = $value : throw new PluginException("Invalid IP address"),
+				'port' => is_int($value) && $value > 0 && $value < 65535 ? $port = $value : throw new PluginException("Invalid port, must be a port in range 0-65535"),
+				'max-connections' => is_int($value) && $value > 0 ? $maxConnections = $value : throw new PluginException("Invalid max connections, must be a number greater than 0"),
+				'password' => is_string($value) || is_int($value) || is_float($value) ? $password = (string) $value : throw new PluginException("Invalid password, must be a string"),
+				default => throw new PluginException("Unexpected config key \"$key\"")
+			};
+		}
+		if($ip === null){
+			throw new PluginException("Missing IP address");
+		}
+		if($port === null){
+			throw new PluginException("Missing port");
+		}
+		if($maxConnections === null){
+			throw new PluginException("Missing max connections");
+		}
+		if($password === null){
+			throw new PluginException("Missing password");
+		}
+
+		return new RconConfig($ip, $port, $maxConnections, $password);
 	}
 }

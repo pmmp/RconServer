@@ -45,6 +45,7 @@ use function str_replace;
 use function strlen;
 use function substr;
 use function trim;
+use function array_key_last;
 use const SO_KEEPALIVE;
 use const SO_LINGER;
 use const SOCKET_ECONNRESET;
@@ -71,7 +72,7 @@ class RconThread extends Thread{
 	private $ipcSocket;
 	/** @var SleeperNotifier */
 	private $notifier;
-
+	
 	public function __construct(\Socket $socket, string $password, int $maxClients, \ThreadedLogger $logger, \Socket $ipcSocket, SleeperNotifier $notifier){
 		$this->stop = false;
 		$this->cmd = "";
@@ -155,7 +156,16 @@ class RconThread extends Thread{
 			$e = null;
 
 			$disconnect = [];
-
+			foreach($clients as $id => $clint){
+				if($id >= $authenticated) continue;
+				if($authenticated[$id] == false) continue;
+				$msgs = Logger::getInstance()->getMessages();
+				foreach ($msgs as $key => $value) {
+					$this->writePacket($clint, 0, 3, $value);	
+				}
+				if($id == array_key_last($clients)) Logger::getInstance()->removeMessages();
+			}
+			
 			if(socket_select($r, $w, $e, 5, 0) > 0){
 				foreach($r as $id => $sock){
 					if($sock === $this->socket){

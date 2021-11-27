@@ -46,6 +46,7 @@ class Main extends PluginBase{
 				$this->getServer()->getLogger(),
 				$this->getServer()->getTickSleeper()
 			));
+			$this->getServer()->getLogger()->addAttachment(new Logger()); // This logs the server logs, and basically sends it
 		}catch(RconException $e){
 			$this->getLogger()->alert('Failed to start RCON: ' . $e->getMessage());
 			$this->getLogger()->logException($e);

@@ -1,4 +1,6 @@
 # RconServer
+[![Poggit](https://poggit.pmmp.io/shield.state/RconServer)](https://poggit.pmmp.io/p/RconServer)
+
 Control your PocketMine-MP server remotely using RCON tools
 
 ## Installing

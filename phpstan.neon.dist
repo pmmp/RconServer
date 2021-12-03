@@ -1,8 +1,0 @@
-parameters:
-	level: 8
-	paths:
-		- src
-	stubFiles:
-		- tests/phpstan/stubs/pthreads.stub
-	featureToggles:
-		disableRuntimeReflectionProvider: true #needed for analysis of pthreads code when pthreads isn't loaded

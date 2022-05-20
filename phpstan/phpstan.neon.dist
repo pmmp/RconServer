@@ -4,5 +4,3 @@ parameters:
 		- ../src
 	stubFiles:
 		- ./pthreads.stub
-	featureToggles:
-		disableRuntimeReflectionProvider: true

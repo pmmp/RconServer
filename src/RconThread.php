@@ -95,6 +95,10 @@ class RconThread extends Thread{
 	private function readPacket(\Socket $client, ?int &$requestID, ?int &$packetType, ?string &$payload) : bool{
 		$d = @socket_read($client, 4);
 
+                if(!socket_getpeername($client, $ip, $port)){
+                        return false;
+                }
+
 		socket_getpeername($client, $ip, $port);
 		if($d === false){
 			$err = socket_last_error($client);

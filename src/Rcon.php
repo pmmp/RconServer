@@ -54,16 +54,12 @@ use const SOL_SOCKET;
 use const SOL_TCP;
 
 class Rcon implements NetworkInterface{
-	/** @var \Socket */
-	private $socket;
+	private \Socket $socket;
 
-	/** @var RconThread */
-	private $thread;
+	private RconThread $thread;
 
-	/** @var \Socket */
-	private $ipcMainSocket;
-	/** @var \Socket */
-	private $ipcThreadSocket;
+	private \Socket $ipcMainSocket;
+	private \Socket $ipcThreadSocket;
 
 	/**
 	 * @phpstan-param callable(string $command) : string $onCommandCallback
@@ -80,7 +76,7 @@ class Rcon implements NetworkInterface{
 			throw new RconException("Unable to set option on socket: " . trim(socket_strerror(socket_last_error())));
 		}
 
-		if(!@socket_bind($this->socket, $config->getIp(), $config->getPort()) or !@socket_listen($this->socket, 5)){
+		if(!@socket_bind($this->socket, $config->ip, $config->port) or !@socket_listen($this->socket, 5)){
 			throw new RconException('Failed to open main socket: ' . trim(socket_strerror(socket_last_error())));
 		}
 
@@ -107,7 +103,7 @@ class Rcon implements NetworkInterface{
 			}, $this->thread);
 		});
 
-		$this->thread = new RconThread($this->socket, $config->getPassword(), $config->getMaxConnections(), $logger, $this->ipcThreadSocket, $notifier);
+		$this->thread = new RconThread($this->socket, $config->password, $config->maxConnections, $logger, $this->ipcThreadSocket, $notifier);
 	}
 
 	public function start() : void{

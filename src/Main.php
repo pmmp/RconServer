@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace pmmp\RconServer;
 
+use pocketmine\errorhandler\ErrorToExceptionHandler;
+use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginException;
+use pocketmine\utils\Filesystem;
 use Webmozart\PathUtil\Path;
 use function base64_encode;
 use function file_exists;
-use function file_get_contents;
 use function file_put_contents;
 use function inet_pton;
 use function is_array;
@@ -27,13 +29,10 @@ class Main extends PluginBase{
 		try{
 			$config = $this->loadConfig($configPath);
 		}catch(PluginException $e){
-			$this->getLogger()->alert('Invalid config file ' . $configPath . ': ' . $e->getMessage());
-			$this->getLogger()->alert('Please fix the errors and restart the server.');
-			$this->getServer()->getPluginManager()->disablePlugin($this);
-			return;
+			throw new DisablePluginException('Failed to load config file ' . $configPath . ': ' . $e->getMessage());
 		}
 
-		$this->getLogger()->info('Starting RCON on ' . $config->getIp() . ':' . $config->getPort());
+		$this->getLogger()->info('Starting RCON on ' . $config->ip . ':' . $config->port);
 		try{
 			$this->getServer()->getNetwork()->registerInterface(new Rcon(
 				$config,
@@ -68,12 +67,13 @@ class Main extends PluginBase{
 			file_put_contents($fileLocation, yaml_emit($config));
 			$this->getLogger()->notice('RCON config file generated at ' . $fileLocation . '. Please customize it.');
 		}else{
-			$rawConfig = @file_get_contents($fileLocation);
-			if($rawConfig === false){
-				throw new PluginException('Failed to read config file (permission denied)');
+			try{
+				$rawConfig = Filesystem::fileGetContents($fileLocation);
+			}catch(\RuntimeException $e){
+				throw new PluginException($e->getMessage(), 0, $e);
 			}
 			try{
-				$config = yaml_parse($rawConfig);
+				$config = ErrorToExceptionHandler::trapAndRemoveFalse(fn() => yaml_parse($rawConfig));
 			}catch(\ErrorException $e){
 				throw new PluginException($e->getMessage());
 			}

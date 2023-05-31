@@ -1,14 +1,21 @@
 {
    "name": "pocketmine/phpstan-plugin-config",
    "require": {
-      "phpstan/phpstan": "^1.2.0",
-      "pocketmine/pocketmine-mp": "4.0.0",
+      "phpstan/phpstan": "^1.10.0",
+      "pocketmine/pocketmine-mp": "4.21.0",
       "phpstan/phpstan-strict-rules": "^1.0",
-      "phpstan/extension-installer": "^1.0"
+      "phpstan/extension-installer": "^1.0",
+      "ext-sockets": "*",
+      "ext-yaml": "*"
    },
    "autoload": {
       "psr-4": {
-         "": "../src"
+         "pmmp\\RconServer\\": "../src"
+      }
+   },
+   "config": {
+      "allow-plugins": {
+         "phpstan/extension-installer": true
       }
    }
 }

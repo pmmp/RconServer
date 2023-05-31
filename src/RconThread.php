@@ -52,37 +52,19 @@ use const SOL_SOCKET;
 
 class RconThread extends Thread{
 
-	/** @var string */
-	public $cmd;
-	/** @var string */
-	public $response;
+	public string $cmd = "";
+	public string $response = "";
 
-	/** @var bool */
-	private $stop;
-	/** @var \Socket */
-	private $socket;
-	/** @var string */
-	private $password;
-	/** @var int */
-	private $maxClients;
-	/** @var \ThreadedLogger */
-	private $logger;
-	/** @var \Socket */
-	private $ipcSocket;
-	/** @var SleeperNotifier */
-	private $notifier;
+	private bool $stop = false;
 
-	public function __construct(\Socket $socket, string $password, int $maxClients, \ThreadedLogger $logger, \Socket $ipcSocket, SleeperNotifier $notifier){
-		$this->stop = false;
-		$this->cmd = "";
-		$this->response = "";
-		$this->socket = $socket;
-		$this->password = $password;
-		$this->maxClients = $maxClients;
-		$this->logger = $logger;
-		$this->ipcSocket = $ipcSocket;
-		$this->notifier = $notifier;
-	}
+	public function __construct(
+		private \Socket $socket,
+		private string $password,
+		private int $maxClients,
+		private \ThreadedLogger $logger,
+		private \Socket $ipcSocket,
+		private SleeperNotifier $notifier
+	){}
 
 	private function writePacket(\Socket $client, int $requestID, int $packetType, string $payload) : void{
 		$pk = Binary::writeLInt($requestID)

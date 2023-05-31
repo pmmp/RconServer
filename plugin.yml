@@ -2,7 +2,7 @@ name: RconServer
 main: pmmp\RconServer\Main
 src-namespace-prefix: pmmp\RconServer
 version: 1.0.0
-api: 4.0.0
+api: 4.21.0
 load: POSTWORLD
 author: PMMP Team
 description: Allow RCON clients to control your server

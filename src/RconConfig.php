@@ -24,36 +24,10 @@ declare(strict_types=1);
 namespace pmmp\RconServer;
 
 class RconConfig{
-
-	/** @var string */
-	private $ip;
-	/** @var int */
-	private $port;
-	/** @var int */
-	private $maxConnections;
-	/** @var string */
-	private $password;
-
-	public function __construct(string $ip, int $port, int $maxConnections, string $password){
-		$this->ip = $ip;
-		$this->port = $port;
-		$this->maxConnections = $maxConnections;
-		$this->password = $password;
-	}
-
-	public function getIp() : string{
-		return $this->ip;
-	}
-
-	public function getPort() : int{
-		return $this->port;
-	}
-
-	public function getMaxConnections() : int{
-		return $this->maxConnections;
-	}
-
-	public function getPassword() : string{
-		return $this->password;
-	}
+	public function __construct(
+		public readonly string $ip,
+		public readonly int $port,
+		public readonly int $maxConnections,
+		public readonly string $password
+	){}
 }

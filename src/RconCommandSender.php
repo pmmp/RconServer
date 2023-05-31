@@ -29,8 +29,7 @@ use function trim;
 
 class RconCommandSender extends ConsoleCommandSender{
 
-	/** @var string */
-	private $messages = "";
+	private string $messages = "";
 
 	public function sendMessage(Translatable|string $message) : void{
 		if($message instanceof Translatable){

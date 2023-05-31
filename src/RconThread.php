@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace pmmp\RconServer;
 
-use pocketmine\snooze\SleeperNotifier;
+use pocketmine\snooze\SleeperHandlerEntry;
+use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\thread\Thread;
 use pocketmine\utils\Binary;
 use function count;
@@ -61,9 +62,9 @@ class RconThread extends Thread{
 		private \Socket $socket,
 		private string $password,
 		private int $maxClients,
-		private \ThreadedLogger $logger,
+		private ThreadSafeLogger $logger,
 		private \Socket $ipcSocket,
-		private SleeperNotifier $notifier
+		private SleeperHandlerEntry $sleeperEntry
 	){}
 
 	private function writePacket(\Socket $client, int $requestID, int $packetType, string $payload) : void{
@@ -129,6 +130,8 @@ class RconThread extends Thread{
 		/** @var int $nextClientId */
 		$nextClientId = 0;
 
+		$notifier = $this->sleeperEntry->createNotifier();
+
 		while(!$this->stop){
 			$r = $clients;
 			$r["main"] = $this->socket; //this is ugly, but we need to be able to mass-select()
@@ -188,8 +191,8 @@ class RconThread extends Thread{
 								}
 								if($payload !== ""){
 									$this->cmd = ltrim($payload);
-									$this->synchronized(function() : void{
-										$this->notifier->wakeupSleeper();
+									$this->synchronized(function() use ($notifier) : void{
+										$notifier->wakeupSleeper();
 										$this->wait();
 									});
 									$this->writePacket($sock, $requestID, 0, str_replace("\n", "\r\n", trim($this->response)));

@@ -30,7 +30,7 @@ namespace pmmp\RconServer;
 
 use pocketmine\network\NetworkInterface;
 use pocketmine\snooze\SleeperHandler;
-use pocketmine\snooze\SleeperNotifier;
+use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\utils\TextFormat;
 use function socket_bind;
 use function socket_close;
@@ -45,7 +45,6 @@ use function socket_write;
 use function trim;
 use const AF_INET;
 use const AF_UNIX;
-use const PTHREADS_INHERIT_NONE;
 use const SO_REUSEADDR;
 use const SOCK_STREAM;
 use const SOCKET_ENOPROTOOPT;
@@ -65,7 +64,7 @@ class Rcon implements NetworkInterface{
 	 * @phpstan-param callable(string $command) : string $onCommandCallback
 	 * @throws RconException
 	 */
-	public function __construct(RconConfig $config, callable $onCommandCallback, \ThreadedLogger $logger, SleeperHandler $sleeper){
+	public function __construct(RconConfig $config, callable $onCommandCallback, ThreadSafeLogger $logger, SleeperHandler $sleeper){
 		$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		if($socket === false){
 			throw new RconException("Failed to create socket: " . socket_strerror(socket_last_error()));
@@ -92,9 +91,7 @@ class Rcon implements NetworkInterface{
 
 		[$this->ipcMainSocket, $this->ipcThreadSocket] = $ipc;
 
-		$notifier = new SleeperNotifier();
-
-		$sleeper->addNotifier($notifier, function() use ($onCommandCallback) : void{
+		$sleeperEntry = $sleeper->addNotifier(function() use ($onCommandCallback) : void{
 			$response = $onCommandCallback($this->thread->cmd);
 
 			$this->thread->response = TextFormat::clean($response);
@@ -103,11 +100,11 @@ class Rcon implements NetworkInterface{
 			}, $this->thread);
 		});
 
-		$this->thread = new RconThread($this->socket, $config->password, $config->maxConnections, $logger, $this->ipcThreadSocket, $notifier);
+		$this->thread = new RconThread($this->socket, $config->password, $config->maxConnections, $logger, $this->ipcThreadSocket, $sleeperEntry);
 	}
 
 	public function start() : void{
-		$this->thread->start(PTHREADS_INHERIT_NONE);
+		$this->thread->start();
 	}
 
 	public function tick() : void{

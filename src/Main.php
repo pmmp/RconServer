@@ -9,7 +9,7 @@ use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginException;
 use pocketmine\utils\Filesystem;
-use Webmozart\PathUtil\Path;
+use Symfony\Component\Filesystem\Path;
 use function base64_encode;
 use function file_exists;
 use function file_put_contents;

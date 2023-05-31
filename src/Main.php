@@ -29,7 +29,8 @@ class Main extends PluginBase{
 		try{
 			$config = $this->loadConfig($configPath);
 		}catch(PluginException $e){
-			throw new DisablePluginException('Failed to load config file ' . $configPath . ': ' . $e->getMessage());
+			$this->getLogger()->alert('Failed to load config file ' . $configPath . ': ' . $e->getMessage());
+			throw new DisablePluginException();
 		}
 
 		$this->getLogger()->info('Starting RCON on ' . $config->ip . ':' . $config->port);

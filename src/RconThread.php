@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pmmp\RconServer;
 
+use pmmp\thread\ThreadSafeArray;
 use pocketmine\snooze\SleeperHandlerEntry;
 use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\thread\Thread;
@@ -53,19 +54,26 @@ use const SOL_SOCKET;
 
 class RconThread extends Thread{
 
+
+
+
 	public string $cmd = "";
 	public string $response = "";
-
+    protected ThreadSafeArray $buffer;
 	private bool $stop = false;
 
 	public function __construct(
 		private \Socket $socket,
-		private string $password,
-		private int $maxClients,
+        string $password,
+        int $maxClients,
 		private ThreadSafeLogger $logger,
 		private \Socket $ipcSocket,
 		private SleeperHandlerEntry $sleeperEntry
-	){}
+	){
+	    $this->buffer = new ThreadSafeArray();
+	    $this->buffer[] = $password;
+        $this->buffer[] = $maxClients;
+    }
 
 	private function writePacket(\Socket $client, int $requestID, int $packetType, string $payload) : void{
 		$pk = Binary::writeLInt($requestID)
@@ -145,7 +153,7 @@ class RconThread extends Thread{
 				foreach($r as $id => $sock){
 					if($sock === $this->socket){
 						if(($client = socket_accept($this->socket)) !== false){
-							if(count($clients) >= $this->maxClients){
+							if(count($clients) >= $this->buffer[1]){
 								@socket_close($client);
 							}else{
 								socket_set_nonblock($client);
@@ -174,7 +182,7 @@ class RconThread extends Thread{
 									break;
 								}
 								socket_getpeername($sock, $addr, $port);
-								if($payload === $this->password){
+								if($payload === $this->buffer[0]){
 									$this->logger->info("Successful Rcon connection from: /$addr:$port");
 									$this->writePacket($sock, $requestID, 2, "");
 									$authenticated[$id] = true;
